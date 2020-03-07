@@ -23,6 +23,7 @@ if(QT_FOUND AND SoQt_FOUND)
 		HDRS
 		ConfigurationDelegate.h
 		ConfigurationModel.h
+		ConnectedModel.h
 		MainWindow.h
 		OperationalDelegate.h
 		OperationalModel.h
@@ -35,6 +36,7 @@ if(QT_FOUND AND SoQt_FOUND)
 		SRCS
 		ConfigurationDelegate.cpp
 		ConfigurationModel.cpp
+		ConnectedModel.cpp
 		MainWindow.cpp
 		OperationalDelegate.cpp
 		OperationalModel.cpp

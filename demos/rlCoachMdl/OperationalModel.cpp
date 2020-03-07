@@ -37,6 +37,7 @@
 #endif
 
 #include "ConfigurationModel.h"
+#include "ConnectedModel.h"
 #include "OperationalModel.h"
 #include "MainWindow.h"
 
@@ -295,9 +296,10 @@ OperationalModel::setData(const QModelIndex& index, const QVariant& value, int r
 				{
 					MainWindow::instance()->geometryModels[this->id]->getBody(i)->setFrame(kinematic->getBodyFrame(i));
 				}
-				
+
+                MainWindow::instance()->connectedModel->updateConnections();
 				emit dataChanged(this->createIndex(0, 0), this->createIndex(this->rowCount(), this->columnCount()));
-				
+
 				return true;
 			}
 			else

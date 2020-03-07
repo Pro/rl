@@ -43,6 +43,7 @@
 
 class ConfigurationDelegate;
 class ConfigurationModel;
+class ConnectedModel;
 class OperationalDelegate;
 class OperationalModel;
 class Server;
@@ -74,6 +75,8 @@ public:
 	std::vector<OperationalModel*> operationalModels;
 	
 	std::shared_ptr<rl::sg::so::Scene> scene;
+
+	ConnectedModel *connectedModel;
 	
 public slots:
 	void changeIkAlgorithm();

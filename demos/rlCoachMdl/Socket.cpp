@@ -32,6 +32,7 @@
 #include <rl/sg/Shape.h>
 
 #include "ConfigurationModel.h"
+#include "ConnectedModel.h"
 #include "MainWindow.h"
 #include "Socket.h"
 
@@ -162,6 +163,8 @@ Socket::readClient()
 					
 					MainWindow::instance()->configurationModels[i]->setData(q);
 				}
+
+                MainWindow::instance()->connectedModel->updateConnections();
 			}
 			break;
 		case 6:
@@ -190,6 +193,73 @@ Socket::readClient()
 				textStream << endl;
 			}
 			break;
+        case 20:
+            {
+                // connect endeffector with body
+                // Message Format:
+                // 20 kinIdx effIdx modIdx bodIdx x y z a b c uuid
+                // kinIdx = index of the kinematic model
+                // effIdx = index of the endeffector
+                // modIdx = index of the model to be connected
+                // bodIdx = index of the body inside the model
+                // x,y,z,a,b,c = optional offset between endeffector and body. If not given, current offset is used
+                // uuid = unique identifier which can be used to disconnect the body
+
+                if (12 != list.size() && 6 != list.size()) {
+                    continue;
+                }
+
+                const std::size_t kinIdx = list[1].toUInt();
+                const std::size_t effIdx = list[2].toUInt();
+                const std::size_t modIdx = list[3].toUInt();
+                const std::size_t bodIdx = list[4].toUInt();
+
+                if (kinIdx >= MainWindow::instance()->kinematicModels.size() ||
+                    effIdx >= MainWindow::instance()->kinematicModels[kinIdx]->getOperationalDof() ||
+                    modIdx >= MainWindow::instance()->scene->getNumModels() ||
+                    bodIdx >= MainWindow::instance()->scene->getModel(modIdx)->getNumBodies()) {
+                    continue;
+                }
+
+                rl::math::Transform offset;
+                std::string uuid;
+                if (list.size() == 12) {
+                    const rl::math::Real x = list[5].toDouble();
+                    const rl::math::Real y = list[6].toDouble();
+                    const rl::math::Real z = list[7].toDouble();
+                    const rl::math::Real a = list[8].toDouble();
+                    const rl::math::Real b = list[9].toDouble();
+                    const rl::math::Real c = list[10].toDouble();
+                    uuid = list[11].toStdString();
+
+                    offset = rl::math::AngleAxis(c, rl::math::Vector3::UnitZ()) *
+                             rl::math::AngleAxis(b, rl::math::Vector3::UnitY()) *
+                             rl::math::AngleAxis(a, rl::math::Vector3::UnitX());
+                    offset.translation().x() = x;
+                    offset.translation().y() = y;
+                    offset.translation().z() = z;
+                } else {
+                    uuid = list[5].toStdString();
+
+                    rl::math::Transform effPos = MainWindow::instance()->kinematicModels[kinIdx]->getOperationalPosition(effIdx);
+                    rl::math::Transform modelPos;
+                    MainWindow::instance()->scene->getModel(modIdx)->getBody(bodIdx)->getFrame(modelPos);
+
+                    offset = effPos.inverse() * modelPos;
+                }
+
+                MainWindow::instance()->connectedModel->addConnection(kinIdx, effIdx, modIdx, bodIdx, offset, uuid);
+            }
+            break;
+        case 21:
+            {
+                if (2 != list.size()) {
+                    continue;
+                }
+                const std::string uuid = list[1].toStdString();
+                MainWindow::instance()->connectedModel->removeConnection(uuid);
+                break;
+            }
 		default:
 			break;
 		}

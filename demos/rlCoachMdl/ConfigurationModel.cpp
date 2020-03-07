@@ -30,6 +30,7 @@
 #include <rl/sg/Body.h>
 
 #include "ConfigurationModel.h"
+#include "ConnectedModel.h"
 #include "MainWindow.h"
 
 ConfigurationModel::ConfigurationModel(QObject* parent) :
@@ -198,7 +199,9 @@ ConfigurationModel::setData(const QModelIndex& index, const QVariant& value, int
 			{
 				MainWindow::instance()->geometryModels[this->id]->getBody(i)->setFrame(kinematic->getBodyFrame(i));
 			}
-			
+
+            MainWindow::instance()->connectedModel->updateConnections();
+
 			emit dataChanged(index, index);
 			
 			return true;
@@ -225,9 +228,11 @@ ConfigurationModel::setData(const rl::math::Vector& q)
 		{
 			MainWindow::instance()->geometryModels[this->id]->getBody(i)->setFrame(kinematic->getBodyFrame(i));
 		}
-		
+
+        MainWindow::instance()->connectedModel->updateConnections();
+
 		emit dataChanged(this->createIndex(0, 0), this->createIndex(this->rowCount(), this->columnCount()));
-		
+
 		return true;
 	}
 	

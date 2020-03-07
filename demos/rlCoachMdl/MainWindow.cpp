@@ -43,10 +43,12 @@
 #include "OperationalModel.h"
 #include "Server.h"
 #include "SoGradientBackground.h"
+#include "ConnectedModel.h"
 
 MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags f) :
 	QMainWindow(parent, f),
 	configurationModels(),
+	connectedModel(new ConnectedModel()),
 	geometryModels(),
 	ikAlgorithmComboBox(new QComboBox(this)),
 	ikDurationSpinBox(new QSpinBox(this)),
